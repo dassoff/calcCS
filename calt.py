@@ -703,9 +703,15 @@ import tkinter as tk
 from tkinter import ttk
 import numpy as np
 
+import tkinter as tk
+from tkinter import ttk
+import numpy as np
+
 class Matrix:
     def __init__(self, tab):
         self.tab = tab
+        self.matrix1 = None
+        self.matrix2 = None
 
         # Создание элементов управления
         self.dimension_label = ttk.Label(tab, text="Размерность матрицы:")
@@ -713,12 +719,12 @@ class Matrix:
         self.dimension_entry = ttk.Entry(tab)
         self.dimension_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        self.create_matrix_button = ttk.Button(tab, text="Создать матрицы", command=self.create_matrices)
+        self.create_matrix_button = ttk.Button(tab, text="Создать матрицу", command=self.create_matrix)
         self.create_matrix_button.grid(row=1, columnspan=2, padx=5, pady=5)
 
         self.operation_label = ttk.Label(tab, text="Выберите операцию:")
         self.operation_label.grid(row=2, column=0, padx=5, pady=5)
-        self.operation_combobox = ttk.Combobox(tab, values=["Сложение", "Вычитание", "Умножение", "Деление", "Транспонирование", "Обратная матрица", "Определитель"])
+        self.operation_combobox = ttk.Combobox(tab, values=["Сложение", "Вычитание", "Умножение", "Транспонирование", "Обратная матрица", "Определитель"])
         self.operation_combobox.grid(row=2, column=1, padx=5, pady=5)
         self.operation_combobox.current(0)
 
@@ -730,14 +736,14 @@ class Matrix:
         self.result_text = tk.Text(tab, width=50, height=20)
         self.result_text.grid(row=4, column=1, padx=5, pady=5)
 
-    def create_matrices(self):
+    def create_matrix(self):
         try:
             dimension = int(self.dimension_entry.get())
-            self.matrix1 = self.input_matrix("Матрица 1", dimension)
-            if self.operation_combobox.get() != "Деление":
+            if self.operation_combobox.get() in ["Сложение", "Вычитание", "Умножение"]:
+                self.matrix1 = self.input_matrix("Матрица 1", dimension)
                 self.matrix2 = self.input_matrix("Матрица 2", dimension)
-            elif self.operation_combobox.get() == "Деление":
-                self.matrix2 = self.input_divisor_matrix("Делитель", dimension)
+            else:
+                self.matrix1 = self.input_matrix("Матрица", dimension)
         except ValueError:
             self.show_error("Ошибка: Некорректная размерность матрицы!")
 
@@ -757,43 +763,23 @@ class Matrix:
 
         return matrix
 
-    def validate_float(self, new_text):
-        if not new_text:
-            return True
-        try:
-            float(new_text)
-            return True
-        except ValueError:
-            return False
-
-    def input_divisor_matrix(self, name, dimension):
-        matrix = []
-        matrix_window = tk.Toplevel(self.tab)
-        matrix_window.title(name)
-        matrix_window.geometry("300x200")
-
-        for i in range(dimension):
-            row = []
-            for j in range(dimension):
-                entry = ttk.Entry(matrix_window, width=5)
-                entry.grid(row=i, column=j, padx=5, pady=5)
-                entry.insert(tk.END, "0")  # Значение по умолчанию
-                entry.config(validate="key", validatecommand=(entry.register(self.validate_float), '%P'))
-                row.append(entry)
-            matrix.append(row)
-
-        return matrix
-
     def calculate(self):
         operation = self.operation_combobox.get()
+        if operation in ["Сложение", "Вычитание", "Умножение"]:
+            if not self.matrix1 or not self.matrix2:
+                self.show_error("Ошибка: Создайте две матрицы для выполнения операции!")
+                return
+        else:
+            if not self.matrix1:
+                self.show_error("Ошибка: Создайте матрицу для выполнения операции!")
+                return
+
         if operation == "Сложение":
             result = self.add_matrices()
         elif operation == "Вычитание":
             result = self.subtract_matrices()
         elif operation == "Умножение":
             result = self.multiply_matrices()
-        elif operation == "Деление":
-            result = self.divide_matrices()
         elif operation == "Транспонирование":
             result = self.transpose_matrix()
         elif operation == "Обратная матрица":
@@ -805,41 +791,6 @@ class Matrix:
             return
 
         self.display_result(result)
-
-    def calculate(self):
-        try:
-            # Проверяем, заполнены ли поля матриц перед вычислениями
-            if any(not entry.get() for row in self.matrix1 for entry in row):
-                raise ValueError("Ошибка: Заполните все поля матрицы 1!")
-            if any(not entry.get() for row in self.matrix2 for entry in row):
-                raise ValueError("Ошибка: Заполните все поля матрицы 2!")
-
-            operation = self.operation_combobox.get()
-            if operation == "Сложение":
-                result = self.add_matrices()
-            elif operation == "Вычитание":
-                result = self.subtract_matrices()
-            elif operation == "Умножение":
-                result = self.multiply_matrices()
-            elif operation == "Деление":
-                result = self.divide_matrices()
-
-            elif operation == "Транспонирование":
-                result = self.transpose_matrix()
-            elif operation == "Обратная матрица":
-                result = self.inverse_matrix()
-            elif operation == "Определитель":
-                result = self.determinant_matrix()
-            else:
-                self.show_error("Ошибка: Неверная операция!")
-                return
-
-            self.display_result(result)
-
-        except ValueError as e:
-            self.show_error(str(e))
-
-
 
     def add_matrices(self):
         result = []
@@ -877,30 +828,13 @@ class Matrix:
             result.append(row)
         return result
 
-    def divide_matrices(self):
-        # Деление матрицы 1 на матрицу 2
-        # Предполагается, что матрица 2 не содержит нулевых значений
-        result = []
-        for i in range(len(self.matrix1)):
-            row = []
-            for j in range(len(self.matrix1[0])):
-                entry1 = float(self.matrix1[i][j].get())
-                entry2 = float(self.matrix2[i][j].get())
-                row.append(entry1 / entry2)
-            result.append(row)
-        return result
-
     def transpose_matrix(self):
         result = []
-        num_rows = len(self.matrix1)
-        num_columns = len(self.matrix1[0])
-
-        for j in range(num_columns):
+        for j in range(len(self.matrix1[0])):
             row = []
-            for i in range(num_rows):
+            for i in range(len(self.matrix1)):
                 row.append(float(self.matrix1[i][j].get()))
             result.append(row)
-
         return result
 
     def inverse_matrix(self):
@@ -926,20 +860,21 @@ class Matrix:
     def display_result(self, result):
         self.result_text.config(state="normal")
         self.result_text.delete('1.0', tk.END)
-        if isinstance(result, (list, tuple)):  # Проверяем, является ли результат итерируемым объектом
+        if isinstance(result, (list, tuple)):
             for row in result:
                 self.result_text.insert(tk.END, ' '.join(map(str, row)) + '\n')
         else:
-            self.result_text.insert(tk.END, str(result) + '\n')  # Добавляем результат как строку
+            self.result_text.insert(tk.END, str(result) + '\n')
         self.result_text.config(state="disabled")
 
     def show_error(self, message):
-        # Вывод сообщения об ошибке
         error_window = tk.Toplevel(self.tab)
         error_window.geometry("250x100")
         error_label = ttk.Label(error_window, text=message, foreground="red")
         error_label.pack(padx=10, pady=10)
 
+# Создание экземпляра класса и привязка его к вкладке
 matrix_calculator = Matrix(tab5)
+
 
 root.mainloop()
