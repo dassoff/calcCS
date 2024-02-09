@@ -853,8 +853,6 @@ class Matrix:
         error_label = ttk.Label(error_window, text=message, foreground="red")
         error_label.pack(padx=10, pady=10)
 
-
-
 matrix_calculator = Matrix(tab5)
 
 root.mainloop()
