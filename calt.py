@@ -263,6 +263,10 @@ notebook.add(tab1, text='Decimal')
 tab2 = ttk.Frame(notebook)
 notebook.add(tab2, text='Binary/Octal/Hex')
 
+# Tab for Complex numbers
+tab3 = ttk.Frame(notebook)
+notebook.add(tab3, text='Complex numbers')
+
 # Entry widget
 txtDisplay = Entry(tab1, font=('Helvetica', 20, 'bold'), bg='black', fg='green', bd=30, width=28, justify=RIGHT)
 txtDisplay.grid(row=0, column=1, columnspan=4, pady=1)
@@ -497,8 +501,145 @@ added_value = BinOctHex(tab2)
 
 #pls fix " . " and " , "
 
+#########################################################
+#########################################################
+#########################################################
+
+
+import cmath
+
+class ComplexNumbers():
+    def __init__(self, tab3):
+        self.num1_label = ttk.Label(tab3, text="Число 1 (a + bi):")
+        self.num1_label.grid(row=0, column=0, padx=5, pady=5)
+        self.num1_entry_real = ttk.Entry(tab3)
+        self.num1_entry_real.grid(row=0, column=1, padx=5, pady=5)
+        self.num1_entry_real.insert(0, "0")
+        self.num1_entry_real.config(validate="key", validatecommand=(self.num1_entry_real.register(self.validate_input), '%P'))
+        self.num1_label_i = ttk.Label(tab3, text="+")
+        self.num1_label_i.grid(row=0, column=2, padx=5, pady=5)
+        self.num1_entry_imaginary = ttk.Entry(tab3)
+        self.num1_entry_imaginary.grid(row=0, column=3, padx=5, pady=5)
+        self.num1_entry_imaginary.insert(0, "0")
+        self.num1_entry_imaginary.config(validate="key", validatecommand=(self.num1_entry_imaginary.register(self.validate_input), '%P'))
+        self.num1_label_i = ttk.Label(tab3, text="i")
+        self.num1_label_i.grid(row=0, column=4, padx=5, pady=5)
+
+        self.num2_label = ttk.Label(tab3, text="Число 2 (c + di):")
+        self.num2_label.grid(row=1, column=0, padx=5, pady=5)
+        self.num2_entry_real = ttk.Entry(tab3)
+        self.num2_entry_real.grid(row=1, column=1, padx=5, pady=5)
+        self.num2_entry_real.insert(0, "0")
+        self.num2_entry_real.config(validate="key", validatecommand=(self.num2_entry_real.register(self.validate_input), '%P'))
+        self.num2_label_i = ttk.Label(tab3, text="+")
+        self.num2_label_i.grid(row=1, column=2, padx=5, pady=5)
+        self.num2_entry_imaginary = ttk.Entry(tab3)
+        self.num2_entry_imaginary.grid(row=1, column=3, padx=5, pady=5)
+        self.num2_entry_imaginary.insert(0, "0")
+        self.num2_entry_imaginary.config(validate="key", validatecommand=(self.num2_entry_imaginary.register(self.validate_input), '%P'))
+        self.num2_label_i = ttk.Label(tab3, text="i")
+        self.num2_label_i.grid(row=1, column=4, padx=5, pady=5)
+
+        self.operation_label = ttk.Label(tab3, text="Операция:")
+        self.operation_label.grid(row=2, column=0, padx=5, pady=5)
+        self.operation_var = tk.StringVar()
+        self.operation_combobox = ttk.Combobox(tab3, textvariable=self.operation_var, values=["+", "-", "*", "/", "^", "√"], state="readonly")
+        self.operation_combobox.grid(row=2, column=1, padx=5, pady=5)
+        self.operation_combobox.current(0)
+
+        self.calculate_button = ttk.Button(tab3, text="Посчитать", command=self.calculate)
+        self.calculate_button.grid(row=3, columnspan=5, padx=5, pady=5)
+
+        self.result_label = ttk.Label(tab3, text="Результат (x + yi):")
+        self.result_label.grid(row=4, column=0, padx=5, pady=5)
+        self.result_entry_real = ttk.Entry(tab3, state="readonly",width=40)
+        self.result_entry_real.grid(row=4, column=1, padx=5, pady=5)
+        self.result_entry_imaginary = ttk.Entry(tab3, state="readonly", width=40)
+        self.result_entry_imaginary.grid(row=4, column=3, padx=5, pady=5)
+        self.result_entry_imaginary.insert(0, "0")
+        self.result_label_i = ttk.Label(tab3, text="i")
+        self.result_label_i.grid(row=4, column=4, padx=5, pady=5)
+
+    def calculate(self):
+        num1_real_str = self.num1_entry_real.get()
+        num1_imaginary_str = self.num1_entry_imaginary.get()
+        num2_real_str = self.num2_entry_real.get()
+        num2_imaginary_str = self.num2_entry_imaginary.get()
+        operation = self.operation_var.get()
+
+        try:
+            num1_real = float(num1_real_str)
+            num1_imaginary = float(num1_imaginary_str)
+            num2_real = float(num2_real_str)
+            num2_imaginary = float(num2_imaginary_str)
+        except ValueError:
+            self.show_error("Ошибка: Недопустимое значение!")
+            return
+
+        num1 = complex(num1_real, num1_imaginary)
+        num2 = complex(num2_real, num2_imaginary)
+
+        if operation == "√":
+            if num1_real > 0 or (num1_real == 0 and num1_imaginary != 0):
+                result = cmath.sqrt(num1)
+            else:
+                self.show_error("Ошибка: Извлечение корня из этого числа невозможно!")
+                return
+        else:
+            if operation == "+":
+                result = num1 + num2
+            elif operation == "-":
+                result = num1 - num2
+            elif operation == "*":
+                result = num1 * num2
+            elif operation == "/":
+                if num2 == 0:
+                    result = "Ошибка: деление на ноль!"
+                else:
+                    result = num1 / num2
+            elif operation == "^":
+                result = num1 ** num2
+            else:
+                self.show_error("Ошибка: Недопустимая операция!")
+                return
+
+        if isinstance(result, complex):
+            result_real = result.real
+            result_imaginary = result.imag
+        else:
+            result_real = result
+            result_imaginary = 0
+
+        self.result_entry_real.config(state="normal")
+        self.result_entry_imaginary.config(state="normal")
+        self.result_entry_real.delete(0, "end")
+        self.result_entry_real.insert(0, result_real)
+        self.result_entry_imaginary.delete(0, "end")
+        self.result_entry_imaginary.insert(0, result_imaginary)
+        self.result_entry_real.config(state="readonly")
+        self.result_entry_imaginary.config(state="readonly")
+
+    def show_error(self, message):
+        self.result_entry_real.config(state="normal")
+        self.result_entry_imaginary.config(state="normal")
+        self.result_entry_real.delete(0, "end")
+        self.result_entry_imaginary.delete(0, "end")
+        self.result_entry_real.insert(0, message)
+        self.result_entry_imaginary.insert(0, "")
+        self.result_entry_real.config(state="readonly")
+        self.result_entry_imaginary.config(state="readonly")
+
+    def validate_input(self, value):
+        if value == "":
+            return True
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
+
+added_complex = ComplexNumbers(tab3)
 root.mainloop()
 
 
-
-
+### fix . pls
