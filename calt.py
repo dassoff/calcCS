@@ -494,6 +494,9 @@ class BinOctHex():
 
 added_value = BinOctHex(tab2)
 
+
+#pls fix " . " and " , "
+
 root.mainloop()
 
 
