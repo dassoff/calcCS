@@ -505,9 +505,6 @@ class BinOctHex():
 
 added_value = BinOctHex(tab2)
 
-
-#pls fix " . " and " , "
-
 #########################################################
 #########################################################
 #########################################################
@@ -701,8 +698,10 @@ class GraphingCalculator:
 
 added_graphics = GraphingCalculator(tab4)
 
+
 import tkinter as tk
 from tkinter import ttk
+import numpy as np
 
 class Matrix:
     def __init__(self, tab):
@@ -719,7 +718,7 @@ class Matrix:
 
         self.operation_label = ttk.Label(tab, text="Выберите операцию:")
         self.operation_label.grid(row=2, column=0, padx=5, pady=5)
-        self.operation_combobox = ttk.Combobox(tab, values=["Сложение", "Вычитание", "Умножение", "Деление"])
+        self.operation_combobox = ttk.Combobox(tab, values=["Сложение", "Вычитание", "Умножение", "Деление", "Транспонирование", "Обратная матрица", "Определитель"])
         self.operation_combobox.grid(row=2, column=1, padx=5, pady=5)
         self.operation_combobox.current(0)
 
@@ -728,7 +727,7 @@ class Matrix:
 
         self.result_label = ttk.Label(tab, text="Результат:")
         self.result_label.grid(row=4, column=0, padx=5, pady=5)
-        self.result_text = tk.Text(tab, width=40, height=10)
+        self.result_text = tk.Text(tab, width=50, height=20)
         self.result_text.grid(row=4, column=1, padx=5, pady=5)
 
     def create_matrices(self):
@@ -758,6 +757,15 @@ class Matrix:
 
         return matrix
 
+    def validate_float(self, new_text):
+        if not new_text:
+            return True
+        try:
+            float(new_text)
+            return True
+        except ValueError:
+            return False
+
     def input_divisor_matrix(self, name, dimension):
         matrix = []
         matrix_window = tk.Toplevel(self.tab)
@@ -769,6 +777,8 @@ class Matrix:
             for j in range(dimension):
                 entry = ttk.Entry(matrix_window, width=5)
                 entry.grid(row=i, column=j, padx=5, pady=5)
+                entry.insert(tk.END, "0")  # Значение по умолчанию
+                entry.config(validate="key", validatecommand=(entry.register(self.validate_float), '%P'))
                 row.append(entry)
             matrix.append(row)
 
@@ -784,11 +794,52 @@ class Matrix:
             result = self.multiply_matrices()
         elif operation == "Деление":
             result = self.divide_matrices()
+        elif operation == "Транспонирование":
+            result = self.transpose_matrix()
+        elif operation == "Обратная матрица":
+            result = self.inverse_matrix()
+        elif operation == "Определитель":
+            result = self.determinant_matrix()
         else:
             self.show_error("Ошибка: Неверная операция!")
             return
 
         self.display_result(result)
+
+    def calculate(self):
+        try:
+            # Проверяем, заполнены ли поля матриц перед вычислениями
+            if any(not entry.get() for row in self.matrix1 for entry in row):
+                raise ValueError("Ошибка: Заполните все поля матрицы 1!")
+            if any(not entry.get() for row in self.matrix2 for entry in row):
+                raise ValueError("Ошибка: Заполните все поля матрицы 2!")
+
+            operation = self.operation_combobox.get()
+            if operation == "Сложение":
+                result = self.add_matrices()
+            elif operation == "Вычитание":
+                result = self.subtract_matrices()
+            elif operation == "Умножение":
+                result = self.multiply_matrices()
+            elif operation == "Деление":
+                result = self.divide_matrices()
+
+            elif operation == "Транспонирование":
+                result = self.transpose_matrix()
+            elif operation == "Обратная матрица":
+                result = self.inverse_matrix()
+            elif operation == "Определитель":
+                result = self.determinant_matrix()
+            else:
+                self.show_error("Ошибка: Неверная операция!")
+                return
+
+            self.display_result(result)
+
+        except ValueError as e:
+            self.show_error(str(e))
+
+
 
     def add_matrices(self):
         result = []
@@ -839,11 +890,47 @@ class Matrix:
             result.append(row)
         return result
 
+    def transpose_matrix(self):
+        result = []
+        num_rows = len(self.matrix1)
+        num_columns = len(self.matrix1[0])
+
+        for j in range(num_columns):
+            row = []
+            for i in range(num_rows):
+                row.append(float(self.matrix1[i][j].get()))
+            result.append(row)
+
+        return result
+
+    def inverse_matrix(self):
+        try:
+            matrix = [[float(entry.get()) for entry in row] for row in self.matrix1]
+            result = np.linalg.inv(matrix)
+            return result.tolist()
+        except ValueError:
+            self.show_error("Ошибка: Все элементы матрицы должны быть числами!")
+        except np.linalg.LinAlgError:
+            self.show_error("Ошибка: Матрица вырожденная, обратная матрица не существует!")
+
+    def determinant_matrix(self):
+        try:
+            matrix = [[float(entry.get()) for entry in row] for row in self.matrix1]
+            result = np.linalg.det(matrix)
+            return result
+        except ValueError:
+            self.show_error("Ошибка: Все элементы матрицы должны быть числами!")
+        except np.linalg.LinAlgError:
+            self.show_error("Ошибка: Матрица вырожденная, определитель не может быть вычислен!")
+
     def display_result(self, result):
         self.result_text.config(state="normal")
         self.result_text.delete('1.0', tk.END)
-        for row in result:
-            self.result_text.insert(tk.END, ' '.join(map(str, row)) + '\n')
+        if isinstance(result, (list, tuple)):  # Проверяем, является ли результат итерируемым объектом
+            for row in result:
+                self.result_text.insert(tk.END, ' '.join(map(str, row)) + '\n')
+        else:
+            self.result_text.insert(tk.END, str(result) + '\n')  # Добавляем результат как строку
         self.result_text.config(state="disabled")
 
     def show_error(self, message):

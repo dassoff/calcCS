@@ -28,13 +28,13 @@ class TestBinOctHex(unittest.TestCase):
         self.assertEqual(result, "21")
 
     def test_multiplication_hex(self):
-        self.calculator.num1_entry.insert(0, "A5")
-        self.calculator.num2_entry.insert(0, "7")
+        self.calculator.num1_entry.insert(0, "8AB")
+        self.calculator.num2_entry.insert(0, "B78")
         self.calculator.system_combobox.current(2)  # Выбираем HEX
-        self.calculator.operation_combobox.current(2)  # Выбираем операцию умножения
+        self.calculator.operation_combobox.current(0)  # Выбираем операцию сложения
         self.calculator.calculate()
         result = self.calculator.result_entry.get()
-        self.assertEqual(result, "4C1")
+        self.assertEqual(result, "1423")
 
     def test_division_error(self):
         self.calculator.num1_entry.insert(0, "10101")
