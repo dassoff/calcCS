@@ -639,7 +639,6 @@ class ComplexNumbers():
             return False
 
 added_complex = ComplexNumbers(tab3)
+
+
 root.mainloop()
-
-
-### fix . pls
