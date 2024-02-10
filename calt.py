@@ -479,9 +479,11 @@ class BinOctHex():
                 result = num1_dec * num2_dec
             elif operation == "/":
                 if num2_dec == 0:
-                    result = "Ошибка: деление на ноль!"
+                    result = 0
+                    result_str = "Ошибка: деление на ноль!"
                 else:
                     result = num1_dec / num2_dec
+                    result = int(num1_dec / num2_dec)  # Округляем результат деления до целого числа
             else:
                 result = "Ошибка: недопустимая операция!"
 
@@ -680,7 +682,7 @@ class GraphingCalculator:
             plt.plot(x_vals, y_vals)
             plt.xlabel('x')
             plt.ylabel('y')
-            plt.title('Graph of the function')
+            plt.title('График функции')
 
             # Установка границ для осей x и y
             plt.xlim(-10, 10)  # Настройка границ для оси x

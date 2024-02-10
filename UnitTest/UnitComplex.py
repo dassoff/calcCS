@@ -71,7 +71,7 @@ class TestComplexNumbers(unittest.TestCase):
         self.complex_numbers.operation_var.set("/")
         self.complex_numbers.calculate()
         self.assertEqual(self.complex_numbers.result_entry_real.get(), "Ошибка: деление на ноль!")
-        self.assertEqual(self.complex_numbers.result_entry_imaginary.get(), "")
+        self.assertEqual(self.complex_numbers.result_entry_imaginary.get(), "0")
 
     def test_square_root(self):
         # Тестирование операции извлечения квадратного корня
