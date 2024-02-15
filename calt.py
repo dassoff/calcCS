@@ -426,9 +426,11 @@ btnDel = Button(tab1, text="←", width=6, height=2,
 import tkinter as tk
 from tkinter import ttk
 
+
 class BinOctHex():
     def __init__(self, tab2):
 
+        # Создание и размещение виджетов для ввода чисел, выбора системы счисления и операции
         self.num1_label = ttk.Label(tab2, text="Число 1:")
         self.num1_label.grid(row=0, column=0, padx=5, pady=5)
         self.num1_entry = ttk.Entry(tab2)
@@ -453,24 +455,29 @@ class BinOctHex():
         self.operation_combobox.grid(row=3, column=1, padx=5, pady=5)
         self.operation_combobox.current(0)
 
+        # Кнопка для запуска расчета
         self.calculate_button = ttk.Button(tab2, text="Посчитать", command=self.calculate)
         self.calculate_button.grid(row=4, columnspan=2, padx=5, pady=5)
 
+        # Виджет для отображения результата
         self.result_label = ttk.Label(tab2, text="Результат:")
         self.result_label.grid(row=5, column=0, padx=5, pady=5)
         self.result_entry = ttk.Entry(tab2, state="readonly")
         self.result_entry.grid(row=5, column=1, padx=5, pady=5)
 
     def calculate(self):
+        # Получение введенных значений
         num1 = self.num1_entry.get()
         num2 = self.num2_entry.get()
         system = self.system_var.get()
         operation = self.operation_var.get()
 
         try:
+            # Преобразование введенных чисел в десятичную систему счисления
             num1_dec = int(num1, 2) if system == "BIN" else int(num1, 8) if system == "OCT" else int(num1, 16)
             num2_dec = int(num2, 2) if system == "BIN" else int(num2, 8) if system == "OCT" else int(num2, 16)
 
+            # Выполнение выбранной операции
             if operation == "+":
                 result = num1_dec + num2_dec
             elif operation == "-":
@@ -487,7 +494,7 @@ class BinOctHex():
             else:
                 result = "Ошибка: недопустимая операция!"
 
-            # Преобразуем результат в нужную систему счисления
+            # Преобразование результата обратно в выбранную систему счисления
             if system == "BIN":
                 result_str = bin(result)[2:]
             elif system == "OCT":
@@ -499,13 +506,15 @@ class BinOctHex():
         except ValueError:
             result_str = "Ошибка: недопустимое значение!"
 
+        # Отображение результата
         self.result_entry.config(state="normal")
         self.result_entry.delete(0, "end")
         self.result_entry.insert(0, result_str)
         self.result_entry.config(state="readonly")
 
-
+# Создание экземпляра класса BinOctHex
 added_value = BinOctHex(tab2)
+
 
 #########################################################
 #########################################################
